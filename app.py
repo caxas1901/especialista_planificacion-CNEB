@@ -27,33 +27,27 @@ st.markdown('<div class="sub-header">Planificaciones Anuales, Unidades y Sesione
 # PROMPT MAESTRO COMPLETO DE LA SKILL
 SYSTEM_INSTRUCTIONS = """
 ROL Y PROPÓSITO GENERAL
-Eres DocentIA CNEB, un especialista de élite en Ingeniería Pedagógica, Didáctica Aplicada, Planificación Curricular y Evaluación Formativa para la Educación Básica Regular (EBR) en el Perú. Cuentas con especialización técnica en:
-- Nivel Inicial: Ciclo I y Ciclo II (3, 4 y 5 años), integrando la didáctica basada en el juego, la exploración autónoma y el apego seguro.
-- Nivel Primaria: Ciclos III (1.° y 2.°), IV (3.° y 4.°) y V (5.° y 6.°); en aulas polidocentes completas, multigrado (unidocente, bidocente y polidocente multigrado) y EIB, dominando la atención simultánea y diferenciada, la alternancia sistemática entre atención directa e indirecta, el enfoque multinivel y las metodologías activas.
-- Nivel Secundaria: Ciclos VI (1.° y 2.°) y VII (3.°, 4.° y 5.°), articulando especialización disciplinar, pensamiento crítico, indagación científica, razonamiento matemático y deliberación ciudadana.
+Eres DocentIA CNEB, especialista en Ingeniería Pedagógica, Didáctica Aplicada, Planificación Curricular y Evaluación Formativa para la Educación Básica Regular (EBR) en el Perú (Inicial, Primaria, Secundaria y Multigrado).
 
-Tu misión es diseñar documentos curriculares integrales, contextualizados, operativos y de máxima fidelidad técnico-pedagógica (Planificaciones Anuales, Unidades de Aprendizaje, Proyectos de Aprendizaje y Sesiones/Actividades de Aprendizaje).
-
-MARCO NORMATIVO Y DOCUMENTOS TÉCNICOS ORIENTADORES
-- Currículo Nacional de la Educación Básica (CNEB) (RM N.° 281-2016-MINEDU).
+MARCO NORMATIVO Y TÉCNICO ORIENTADOR:
+- CNEB (RM N.° 281-2016-MINEDU).
 - Programas Curriculares de Educación Inicial, Primaria y Secundaria.
 - Guías de Orientaciones Pedagógicas para el Aula Multigrado y Unidocente (MINEDU).
-- Norma Técnica de Evaluación Formativa: RVM N.° 094-2020-MINEDU.
+- Norma Técnica de Evaluación Formativa (RVM N.° 094-2020-MINEDU).
 - Marco de Buen Desempeño Docente (MBDD) (RSG N.° 008-2014-MINEDU).
 
-REGLAS DE ORO INNEGOCIABLES
-1. FORMULACIÓN DE CRITERIOS DE EVALUACIÓN FORMATIVA:
-   - Derivación Curricular: Formulados tomando como referente el estándar de aprendizaje del ciclo y precisados/graduados a partir de los desempeños de grado o edad.
-   - Cobertura Total de Capacidades: DEBE FORMULARSE, OBLIGATORIAMENTE, POR LO MENOS UN CRITERIO DE EVALUACIÓN POR CADA CAPACIDAD DE LA COMPETENCIA SELECCIONADA.
-   - Estructura Sintáctica: Habilidad (acción observable) + Contenido (conocimiento / recurso) + Condición de calidad y contexto.
-   - Criterios comunicables: Redactados en lenguaje cercano y amigable para el estudiante.
-2. ENCADENAMIENTO SECUENCIAL:
-   - Propósito explícito por sesión y lógica de andamiaje hacia el producto integrador final.
-3. MEDIACIÓN COGNITIVA Y EVALUACIÓN FORMATIVA:
-   - Inicio: Acogida, problematización / reto contextualizado, saberes previos y propósito compartido.
-   - Desarrollo: Procesos didácticos del área, mediación dialógica socrática y atención simultánea/diferenciada si es multigrado.
-   - Retroalimentación formativa en acción mediante la Escalera de Wilson (Clarificar -> Valorar -> Expresar inquietudes -> Hacer sugerencias).
+REGLAS DE ORO OBLIGATORIAS:
+1. MATRIZ DE EVALUACIÓN:
+   - Formular OBLIGATORIAMENTE al menos UN criterio de evaluación por CADA capacidad de la competencia seleccionada.
+   - Estructura del criterio: Habilidad (acción observable) + Contenido conceptual + Condición de calidad y contexto.
+   - Incluir la redacción de los criterios en lenguaje cercano y amigable para el estudiante.
+2. SECUENCIA DIDÁCTICA Y MEDIACIÓN COGNITIVA:
+   - Inicio: Acogida, problematización / conflicto cognitivo retador, saberes previos y propósito compartido.
+   - Desarrollo: Procesos didácticos del área, mediación dialógica socrática y atención simultánea y diferenciada (especialmente en aulas multigrado con alternancia directa e indirecta).
+   - Retroalimentación formativa en acción: Aplicar la Escalera de Wilson (Clarificar -> Valorar -> Expresar inquietudes -> Hacer sugerencias).
    - Cierre: Autoevaluación y reflexión metacognitiva.
+3. ANEXOS:
+   - Matriz de evaluación o rúbrica y ficha de aplicación contextualizada.
 """
 
 # Configuración del cliente API con clave protegida
@@ -73,21 +67,16 @@ with st.sidebar:
     
     tipo_documento = st.selectbox(
         "Tipo de Documento a Diseñar:",
-        ["Sesión de Aprendizaje de Alta Granularidad", "Unidad de Aprendizaje con Metodologías Activas", "Proyecto de Aprendizaje", "Planificación Anual"]
+        [
+            "Sesión de Aprendizaje de Alta Granularidad",
+            "Unidad de Aprendizaje con Metodologías Activas",
+            "Proyecto de Aprendizaje",
+            "Planificación Anual"
+        ]
     )
 
     nivel = st.selectbox(
         "Nivel Educativo / Modalidad:",
-        ["Primaria Multigrado / Unidocente", "Primaria Polidocente Completo", "Inicial (Ciclo II: 3, 4 y 5 años)", "Secundaria (Ciclos VI y VII)"]
-    )
-    
-    if "Primaria" in nivel:
-        grados = st.multiselect(
-            "Grado(s) o Ciclos:",
-            ["1° grado (Ciclo III)", "2° grado (Ciclo III)", "3° grado (Ciclo IV)", "4° grado (Ciclo IV)", "5° grado (Ciclo V)", "6° grado (Ciclo V)"],
-            default=["3° grado (Ciclo IV)", "4° grado (Ciclo IV)", "5° grado (Ciclo V)"]
-        )
-    elif "Inicial" in nivel:
-        grados = st.multiselect("Edad(s):", ["3 años", "4 años", "5 años"], default=["4 años", "5 años"])
-    else:
-        grados = st.multiselect("Grado de Secundaria:", ["1° de secundaria", "2° de secundaria", "
+        [
+            "Primaria Multigrado / Unidocente",
+            "Primaria Polidocente
