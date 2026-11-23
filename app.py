@@ -36,7 +36,8 @@ if st.button("Generar Planificación", type="primary"):
         with st.spinner("Elaborando planificación curricular..."):
             try:
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    # Reemplázala por:
+model="gemini-3.8-flash",
                     contents=consulta,
                     config=genai.types.GenerateContentConfig(
                         system_instruction=SYSTEM_INSTRUCTIONS,
