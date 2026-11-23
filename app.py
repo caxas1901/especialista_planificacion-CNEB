@@ -52,7 +52,7 @@ if not api_key:
 
 client = genai.Client(api_key=api_key)
 
-# Panel lateral o superior para configuración de la planificación
+# Panel lateral con selectores pedagógicos
 with st.sidebar:
     st.header("⚙️ Parámetros Curriculares")
     
@@ -79,7 +79,7 @@ with st.sidebar:
     
     duracion = st.select_slider("Duración estimada (minutos):", options=[45, 90, 135, 180], value=90)
 
-# Formulario principal de entrada contextual
+# Formulario principal de entrada
 col1, col2 = st.columns([2, 1])
 
 with col1:
@@ -108,7 +108,6 @@ if st.button("🚀 Generar Planificación Didáctica", type="primary", use_conta
     if not titulo_tema.strip():
         st.warning("Por favor ingresa al menos el título o tema eje para estructurar la planificación.")
     else:
-        # Construcción interna del prompt contextualizado
         prompt_estructurado = f"""
         POR FAVOR DISEÑA LA SESIÓN DE APRENDIZAJE CON LOS SIGUIENTES PARÁMETROS:
         - Nivel/Modalidad: {nivel}
@@ -124,35 +123,44 @@ if st.button("🚀 Generar Planificación Didáctica", type="primary", use_conta
         Devuelve el documento completo organizado con las siguientes secciones en Markdown:
         1. DATOS INFORMATIVOS Y PROPÓSITOS DE APRENDIZAJE
         2. MATRIZ DE EVALUACIÓN FORMATIVA (Tabla con Competencia, Capacidades, Criterios de Evaluación y Criterios en lenguaje cercano)
-        3. SECUENCIA DIDÁCTICA DETALLADA (Inicio, Desarrollo con procesos didácticos y alternancia/atención simultánea-diferenciada si es multigrado, y Cierre con metacognición)
+        3. SECUENCIA DIDÁCTICA DETALLADA (Inicio, Desarrollo con procesos didácticos y alternancia si es multigrado, y Cierre con metacognición)
         4. PROTOCOLO DE RETROALIMENTACIÓN (Escalera de Wilson modelada)
         5. ANEXO: INSTRUMENTO FORMATIVO / FICHA DE TRABAJO
         """
         
         with st.spinner("Construyendo planificación técnica de alta granularidad..."):
-            try:
-                response = client.models.generate_content(
-                    model="gemini-3.8-flash",
-                    contents=prompt_estructurado,
-                    config=genai.types.GenerateContentConfig(
-                        system_instruction=SYSTEM_INSTRUCTIONS,
-                        temperature=0.3
+            # Rotación en cascada de modelos activos en tu cuenta
+            modelos_disponibles = ["gemini-3.8-flash", "gemini-flash-latest", "gemini-3.5-flash-lite"]
+            respuesta_generada = None
+            ultimo_error = ""
+
+            for mod in modelos_disponibles:
+                try:
+                    response = client.models.generate_content(
+                        model=mod,
+                        contents=prompt_estructurado,
+                        config=genai.types.GenerateContentConfig(
+                            system_instruction=SYSTEM_INSTRUCTIONS,
+                            temperature=0.3
+                        )
                     )
-                )
-                
+                    if response and response.text:
+                        respuesta_generada = response.text
+                        break
+                except Exception as e:
+                    ultimo_error = str(e)
+                    continue
+
+            if respuesta_generada:
                 st.success("¡Planificación curricular generada exitosamente!")
-                
-                # Visualización organizada
                 st.markdown("---")
-                st.markdown(response.text)
+                st.markdown(respuesta_generada)
                 
-                # Botón de descarga directa del contenido
                 st.download_button(
-                    label="📥 Descargar planificación en formato de texto (.txt / Markdown)",
-                    data=response.text,
-                    file_name=f"Sesion_{area.replace(' ', '_')}_{titulo_tema[:15].strip()}.txt",
+                    label="📥 Descargar planificación (.txt)",
+                    data=respuesta_generada,
+                    file_name=f"Sesion_{area.replace(' ', '_')}.txt",
                     mime="text/plain"
                 )
-
-            except Exception as e:
-                st.error(f"Error en la generación: {e}")
+            else:
+                st.error(f"Los servidores están experimentando alta demanda momentánea. Intenta presionar nuevamente. Detalle: {ultimo_error}")
